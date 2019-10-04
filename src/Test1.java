@@ -1,4 +1,4 @@
-// Java implementation of Server side 
+// Socket Chat App By Misael and Miguel CS4770
 
 import java.io.*; 
 import java.util.*; 
@@ -13,6 +13,51 @@ public class Test1
 	
 	// counter for clients 
 	static int id = 1; 
+	static int port_number;
+	static Scanner scanner = new Scanner(System.in); 
+	
+	public static void main(String[] args) throws IOException
+	{ 
+		//Validates the port number when app starts; otherwise, it stops the app.
+		if(args.length < 1) {
+			System.out.println("Enter a port number to start the App: ");
+			String userInput = scanner.nextLine(); 
+			try {
+				port_number = Integer.parseInt(userInput);
+			}catch(Exception e){
+				invalidPort();
+			}
+			
+		}else {
+			try {
+				port_number = Integer.parseInt(args[0]);
+			}catch(Exception e){
+				invalidPort();
+			}
+		}
+		
+		InetAddress ip = InetAddress.getLocalHost();
+		System.out.println("Welcome to myChat App");
+		System.out.println("***Your IP is: "+ip.getHostAddress()+" and port "+port_number+" ***");
+		System.out.println("Try 'help' to display command options.");
+		
+		
+		//Initialize variable
+		menu appMenu = new menu();
+		
+		//Appserver will listen for new connections and add them to the list automatically.
+		//It will also listen for new upcoming messages and display them.
+		myServer appServer = new myServer(port_number);
+		
+		//Create threads
+		Thread server = new Thread(appServer);
+		Thread menuThread = new Thread(appMenu);
+		
+		//Starts threads
+		server.start();
+		menuThread.start();
+		
+	} 
 	
 	//server class
 	static class myServer implements Runnable {
@@ -43,16 +88,14 @@ public class Test1
 					System.out.println("Adding client to your list with index: "+ id); 
 					
 					// Create a new handler object for handling this request. 
-					ClientHandler newConnection = new ClientHandler(s,"client " + id, dis, dos); 
+					ClientHandler newConnection = new ClientHandler(s, dis, dos); 
 					
 					// Create a new Thread with this object. 
 					Thread newClientThread = new Thread(newConnection); 
 					
 					// add this client to active clients list 
-//					ar.add(newConnection); 
 					clientsList.add(newConnection);
 					
-
 					// start the thread. 
 					newClientThread.start(); 
 					
@@ -76,6 +119,9 @@ public class Test1
 	
 	public static class menu implements Runnable{
 		Scanner scn = new Scanner(System.in); 
+		InetAddress ip;
+		
+		
 		
 		@Override
 		public void run() { 
@@ -83,9 +129,22 @@ public class Test1
 
 				// read string and gets command. 
 				String userInput = scn.nextLine(); 
-				String command[] = userInput.split(" ");	
+				String command[] = userInput.split(" ");
+				try {
+					ip = InetAddress.getLocalHost();
+				} catch (UnknownHostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
-				if(command[0].toLowerCase().equals("connect")) {
+				
+				if(command[0].toLowerCase().equals("help")) {
+					//TODO
+				}else if(command[0].toLowerCase().equals("myip")) {
+					System.out.println("Your IP Adress is: " + ip.getHostAddress());		
+				}else if(command[0].toLowerCase().equals("myport")) {
+					System.out.println("Your Port Number is: " + port_number);	
+				}else if(command[0].toLowerCase().equals("connect")) {
 					
 					// establish the connection 
 					try {
@@ -98,13 +157,12 @@ public class Test1
 						System.out.println("Adding client to your list with index: "+ id); 
 						
 						// Create a new handler object for handling this request. 
-						ClientHandler newConnection = new ClientHandler(s,"client " + id, dis, dos); 
+						ClientHandler newConnection = new ClientHandler(s, dis, dos); 
 						
 						// Create a new Thread with this object. 
 						Thread newClientThread = new Thread(newConnection); 
 						
 						// add this client to active clients list 
-//						ar.add(newConnection); 
 						clientsList.add(newConnection);
 						
 
@@ -114,18 +172,44 @@ public class Test1
 						// increment id for new client. 
 						id++; 
 						
-					} catch (NumberFormatException e) {
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (UnknownHostException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} 
+					}  
+				}else if(command[0].toLowerCase().equals("list")) {
+					//TODO
+				}else if(command[0].toLowerCase().equals("terminate")) {
+					//TODO
 				}else if(command[0].toLowerCase().equals("send")) {
-					sendMessage(Integer.parseInt(command[1]), command[2]);
+					
+					String message = "";
+					int destination;
+					
+					if(command.length > 2) {
+						//puts messages together
+						for(int i = 2; i < command.length; i++) {
+							message += command[i] + " ";
+						}
+						
+						try {
+							destination = Integer.parseInt(command[1]);
+							sendMessage(destination, message);
+						}catch(Exception e){
+							System.out.println("Please enter a valid connection id and try again!!!!");
+						}
+						
+						
+						
+					}else {
+						System.out.println("Invalid format.");
+						System.out.println("Try 'send <connection id> <message>'");
+					}
+					
+					
+				}else if(command[0].toLowerCase().equals("exit")) {
+					terminateApp();
+				}else {
+					System.out.println("Command not found. Try 'help' for a list of valid commands.");
 				}
 				 
 			} 
@@ -133,12 +217,14 @@ public class Test1
 		
 	}
 	
+	//Function to send messages
 	public static void sendMessage(int connection_Id, String message) {
 		int client = connection_Id - 1;
 		if( client < clientsList.size()){
 			// write on the output stream for the specify client
 			try {
 				clientsList.get(client).dos.writeUTF(message);
+				System.out.println("Message sent");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -148,32 +234,16 @@ public class Test1
 		}
 		
 	}
-
 	
-	public static void main(String[] args) throws IOException
-	{ 
-		System.out.println("myChat App started on port 6000");
-		System.out.println("There are not connections yet.");
-		System.out.println("Try connect <locat ip> <port>");
-		
-		int port_number = 6000;
-		
-		//Initialize variable
-		menu appMenu = new menu();
-		
-		//Appserver will listen for new connections and add them to the list automatically.
-		//It will also listen for new upcoming messages and display them.
-		myServer appServer = new myServer(port_number);
-		
-		//Create threads
-		Thread server = new Thread(appServer);
-		Thread menuThread = new Thread(appMenu);
-		
-		//Starts threads
-		server.start();
-		menuThread.start();
-		
-	} 
+	public static void invalidPort() {
+		System.out.println("Please make sure you input a valid port number.");
+		System.out.println("Try running the program again with a valid port number.");
+		terminateApp();
+	}
+	public static void terminateApp() {
+		System.out.println("Program Terminated. Bye...");
+		System.exit(0);
+	}
 } 
 
 
