@@ -1,5 +1,3 @@
-package chat;
-
 
 public class connection {
 	

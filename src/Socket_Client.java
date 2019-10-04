@@ -20,7 +20,7 @@ class Thread_Receive extends Thread
                 System.out.println("Received from server: " + s);
             }
             catch (Exception e)
-            { }
+            { System.out.println(e);}
         }
     }
 }
@@ -44,7 +44,7 @@ class Thread_Send extends Thread
                 oOutputStream.writeObject(ins);
             }
             catch (Exception e)
-            { }
+            { System.out.println(e);}
         }
     }
 }
@@ -56,7 +56,7 @@ public class Socket_Client
     {
         try
         {
-            Socket clientSocket = new Socket("130.182.4.92", 8069);
+            Socket clientSocket = new Socket("137.25.63.243", 8061);
 
             OutputStream outStream = clientSocket.getOutputStream();
             ObjectOutput oOutputStream = new ObjectOutputStream(outStream);
@@ -78,3 +78,8 @@ public class Socket_Client
         { }
     }
 }
+
+//172.119.221.99
+//137.25.63.243
+//137.25.63.243
+//130.182.4.92
