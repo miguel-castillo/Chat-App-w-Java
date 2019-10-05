@@ -8,7 +8,7 @@ import java.net.*;
  
 public class Test1 {
 	
-	final static int MIN_PORT_NUMBER = 49152;
+	final static int MIN_PORT_NUMBER = 0000;
 	final static int MAX_PORT_NUMBER = 65535;
 
 	// List that will store the clients or connections
@@ -73,15 +73,18 @@ public class Test1 {
 		//Close all connections when windows gets closed.
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
-		    @Override
+			@Override
 		    public void run() {
+		    	System.out.println(clientsList.size());
 		    	if(clientsList.size() != 0) {
+		    		System.out.println("hey");
 		    		for(int i = 0; i< clientsList.size(); i++) {
 						sendMessage(i+1,"logout");
 					}
 		    	}
 		    	
 		    }
+
 
 		});
 		
@@ -94,7 +97,11 @@ public class Test1 {
 		  try {
 			  try {
 	            Socket s = new Socket(host, port);
+	            System.out.println(s.getPort());
+	            System.out.println(s.getInetAddress().getAddress());
+	            System.out.println();
 	            s.close();
+	            System.out.println("socket close");
 			  }catch(ConnectException e){
 				  result = true;
 			  }
@@ -125,15 +132,14 @@ public class Test1 {
 			while (true) 
 			{ 
 				// Accept the incoming request 
+				int tempSize = clientsList.size();
 				try {
 					s = ss.accept();
-					System.out.println("New connection request received"); 
 					
 					// obtain input and output streams 
 					DataInputStream dis = new DataInputStream(s.getInputStream()); 
 					DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
 					
-					System.out.println("Adding client to your list with index: "+ id); 
 					
 					// Create a new handler object for handling this request. 
 					ClientHandler newConnection = new ClientHandler(s, dis, dos, id); 
@@ -155,6 +161,20 @@ public class Test1 {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} 
+				
+				//checks that the socket is still connected otherwise it removes it from the list
+				for(int i = 0; i<clientsList.size(); i++) {
+					if(clientsList.get(i).s.isClosed()) {
+						clientsList.remove(i);
+						id--;
+					}
+				}
+				
+				if(tempSize == clientsList.size()) {
+					System.out.println("New connection request received"); 
+					System.out.println("Adding client to your list with index: "+ id); 
+					
+				}
 
 
 			} 
@@ -199,6 +219,7 @@ public class Test1 {
 				}else if(command[0].toLowerCase().equals("myport")) {
 					System.out.println("Your Port Number is: " + port_number);	
 				}else if(command[0].toLowerCase().equals("connect")) {
+					
 					
 					// establish the connection 
 					try {
@@ -331,7 +352,9 @@ public class Test1 {
 	
 	//close the app safely
 	public static void terminateApp() {
+		System.out.println(clientsList.size());
 		if (clientsList.size() != 0){
+			System.out.println("hey");
 			for(int i = 0; i< clientsList.size(); i++) {
 				sendMessage(i+1,"logout");
 			}
@@ -352,3 +375,5 @@ public class Test1 {
 	}
 
 } 
+
+
