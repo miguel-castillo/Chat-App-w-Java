@@ -157,7 +157,7 @@ public class MyChatApp
 		System.out.println("Try connect <locat ip> <port>");
 		System.out.println("Try send 1 hello");
 		
-		int port_number = 5000;
+		int port_number = 5001;
 		
 		//Initialize variable
 		menu appMenu = new menu();
