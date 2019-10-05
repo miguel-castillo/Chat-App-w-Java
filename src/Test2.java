@@ -42,7 +42,7 @@ public class Test2{
 					System.out.println("Adding client to your list with index: "+ id); 
 					
 					// Create a new handler object for handling this request. 
-					ClientHandler newConnection = new ClientHandler(s,"client " + id, dis, dos); 
+					ClientHandler newConnection = new ClientHandler(s,dis, dos); 
 					
 					// Create a new Thread with this object. 
 					Thread newClientThread = new Thread(newConnection); 
@@ -97,7 +97,7 @@ public class Test2{
 						System.out.println("Adding client to your list with index: "+ id); 
 						
 						// Create a new handler object for handling this request. 
-						ClientHandler newConnection = new ClientHandler(s,"client " + id, dis, dos); 
+						ClientHandler newConnection = new ClientHandler(s, dis, dos); 
 						
 						// Create a new Thread with this object. 
 						Thread newClientThread = new Thread(newConnection); 
