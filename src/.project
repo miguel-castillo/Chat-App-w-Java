@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-<<<<<<< HEAD
-	<name>Project1</name>
-=======
-	<name>Chat-App-w-Java</name>
->>>>>>> c1950f5d21845ddbd64fdd5f0d6a51db3ed8137d
+	<name>src</name>
 	<comment></comment>
 	<projects>
 	</projects>
