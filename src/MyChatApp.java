@@ -89,10 +89,12 @@ public class MyChatApp {
 		  boolean result = false;
 		  
 		  try {
-
+			  try {
 	            Socket s = new Socket(host, port);
 	            s.close();
-	            result = true;
+			  }catch(ConnectException e){
+				  result = true;
+			  }
 
 	        }
 	        catch(Exception e) {
