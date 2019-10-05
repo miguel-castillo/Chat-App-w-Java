@@ -54,6 +54,17 @@ public class Test2 {
 		//Starts threads
 		server.start();
 		menuThread.start();
+		//Close all connections when windows gets closed.
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+		    @Override
+		    public void run() {
+		    	for(int i = 0; i< clientsList.size(); i++) {
+					sendMessage(i+1,"logout");
+				}
+		    }
+
+		});
 		
 	} 
 	
@@ -256,12 +267,14 @@ public class Test2 {
 		
 	}
 	
-
+	//validate port number
 	public static void invalidPort() {
 		System.out.println("Please make sure you input a valid port number.");
 		System.out.println("Try running the program again with a valid port number.");
 		terminateApp();
 	}
+	
+	//terminate any connection and removes it from the list
 	public static void terminateConnection(ClientHandler client, int id) {
 		ClientHandler connection = client;
 		try {
@@ -276,6 +289,7 @@ public class Test2 {
 		clientsList.remove(id);
 	}
 	
+	//close the app safely
 	public static void terminateApp() {
 		for(int i = 0; i< clientsList.size(); i++) {
 			sendMessage(i+1,"logout");
@@ -283,9 +297,10 @@ public class Test2 {
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
+	
+	// remove socket connections that are closed from the list.
 	public static void removeCloseConnection() {
 		for(int i = 0; i<clientsList.size(); i++) {
-			System.out.println(clientsList.get(i).s.isClosed());
 			if(clientsList.get(i).s.isClosed()) {
 				clientsList.remove(i);
 			}
@@ -293,4 +308,6 @@ public class Test2 {
 	}
 
 } 
+
+
 
