@@ -26,8 +26,8 @@ public class MyChatApp {
 			String userInput = scanner.nextLine(); 
 			try {
 				port_number = Integer.parseInt(userInput);
-				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
-				if(!portInUse) {
+				boolean portInUse = availablePort(port_number);
+				if(portInUse == true) {
 					throw new IllegalArgumentException("Invalid start port: " + port_number);
 				}else {
 					if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER) {
@@ -41,10 +41,14 @@ public class MyChatApp {
 		}else {
 			try {
 				port_number = Integer.parseInt(args[0]);
-				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
-				if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER || portInUse) {
-			        throw new IllegalArgumentException("Invalid start port: " + port_number);
-			    }
+				boolean portInUse = availablePort(port_number);
+				if(portInUse == true) {
+					throw new IllegalArgumentException("Invalid start port: " + port_number);
+				}else {
+					if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER) {
+						throw new IllegalArgumentException("Invalid start port: " + port_number);
+				    }
+				}
 			}catch(Exception e){
 				invalidPort();
 			}
@@ -90,26 +94,16 @@ public class MyChatApp {
 		
 	}
 	
-	private static boolean availablePort(String host, int port) {
+	private static boolean availablePort(int port) {
 		  // Assume port is available.
 		  boolean result = false;
-		  
+		 
 		  try {
-			  try {
-	            Socket s = new Socket(host, port);
-	            System.out.println(s.getPort());
-	            System.out.println(s.getInetAddress().getAddress());
-	            System.out.println();
+	            ServerSocket s = new ServerSocket(port);
 	            s.close();
-	            System.out.println("socket close");
-			  }catch(ConnectException e){
+			  }catch(Exception e){
 				  result = true;
 			  }
-
-	        }
-	        catch(Exception e) {
-	            result = false;
-	        }
 
 		  return result;
 		}
@@ -329,7 +323,7 @@ public class MyChatApp {
 	
 	//validate port number
 	public static void invalidPort() {
-		System.out.println("Please make sure you input a valid port number.");
+		System.out.println("Please make sure you input a valid port number and that the port is not being used in your computer.");
 		System.out.println("Try running the program again with a valid port number.");
 		terminateApp();
 	}
@@ -352,9 +346,7 @@ public class MyChatApp {
 	
 	//close the app safely
 	public static void terminateApp() {
-		System.out.println(clientsList.size());
 		if (clientsList.size() != 0){
-			System.out.println("hey");
 			for(int i = 0; i< clientsList.size(); i++) {
 				sendMessage(i+1,"logout");
 			}
