@@ -186,7 +186,7 @@ public class MyChatApp {
 					} else {
 						System.out.println("id: IP address				Port No.");
 						for (int i = 0; i < clientsList.size(); i++) {
-							System.out.println((i+1) + ": " + clientsList.get(i).s.getInetAddress() + "			" + clientsList.get(i).s.getPort());
+							System.out.println((i+1) + ": " + clientsList.get(i).s.getLocalAddress() + "			" + clientsList.get(i).s.getPort());
 						}
 					}
 				}else if(command[0].toLowerCase().equals("terminate")) {
@@ -283,6 +283,14 @@ public class MyChatApp {
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
+	public static void removeCloseConnection() {
+		for(int i = 0; i<clientsList.size(); i++) {
+			System.out.println(clientsList.get(i).s.isClosed());
+			if(clientsList.get(i).s.isClosed()) {
+				clientsList.remove(i);
+			}
+		}
+	}
 
 } 
 
@@ -298,6 +306,7 @@ class ClientHandler implements Runnable
 	boolean isloggedin;
 	private volatile boolean flag = true;
 	private int id;
+	MyChatApp chat = new MyChatApp();
 	
 	// constructor 
 	public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos, int id) { 
@@ -306,6 +315,7 @@ class ClientHandler implements Runnable
 		this.s = s; 
 		this.isloggedin=true; 
 		this.id = id;
+		
 	} 
 	
 	public void stopRunning() {
@@ -313,6 +323,7 @@ class ClientHandler implements Runnable
 		this.isloggedin=false;
 	}
 
+	@SuppressWarnings("static-access")
 	@Override
 	public void run() { 
 
@@ -329,8 +340,10 @@ class ClientHandler implements Runnable
 				//Should delete the connection from the vector
 				if(received.equals("logout")){ 
 					this.isloggedin=false; 
-					System.out.println("==* Connection with ID "+ id +"disconnected and removed from your list *==");
 					this.s.close();
+					chat.removeCloseConnection();
+					System.out.println("==* Connection with ID "+ id +" disconnected and removed from your list *==");
+					
 					break; 
 				} else {
 					System.out.println("=============== New Message Receive ==================");

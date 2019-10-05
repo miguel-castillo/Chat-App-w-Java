@@ -86,7 +86,7 @@ public class Test1 {
 					System.out.println("Adding client to your list with index: "+ id); 
 					
 					// Create a new handler object for handling this request. 
-					ClientHandler newConnection = new ClientHandler(s, dis, dos); 
+					ClientHandler newConnection = new ClientHandler(s, dis, dos, id); 
 					
 					// Create a new Thread with this object. 
 					Thread newClientThread = new Thread(newConnection); 
@@ -161,7 +161,7 @@ public class Test1 {
 						System.out.println("Adding client to your list with index: "+ id); 
 						
 						// Create a new handler object for handling this request. 
-						ClientHandler newConnection = new ClientHandler(s, dis, dos); 
+						ClientHandler newConnection = new ClientHandler(s, dis, dos, id); 
 						
 						// Create a new Thread with this object. 
 						Thread newClientThread = new Thread(newConnection); 
@@ -186,7 +186,7 @@ public class Test1 {
 					} else {
 						System.out.println("id: IP address				Port No.");
 						for (int i = 0; i < clientsList.size(); i++) {
-							System.out.println((i+1) + ": " + clientsList.get(i).s.getInetAddress() + "			" + clientsList.get(i).s.getPort());
+							System.out.println((i+1) + ": " + clientsList.get(i).s.getLocalAddress() + "			" + clientsList.get(i).s.getPort());
 						}
 					}
 				}else if(command[0].toLowerCase().equals("terminate")) {
@@ -198,15 +198,7 @@ public class Test1 {
 						System.out.println("Please enter a valid connection ID.");
 					} else {
 						ClientHandler connection = clientsList.get(connectionID);
-						try {
-							
-							connection.s.close();
-							connection.dis.close();
-							connection.dos.close();
-							connection.stopRunning();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						terminateConnection(connection, connectionID);
 					}
 					
 				}else if(command[0].toLowerCase().equals("send")) {
@@ -270,11 +262,35 @@ public class Test1 {
 		System.out.println("Try running the program again with a valid port number.");
 		terminateApp();
 	}
+	public static void terminateConnection(ClientHandler client, int id) {
+		ClientHandler connection = client;
+		try {
+			
+			connection.s.close();
+			connection.dis.close();
+			connection.dos.close();
+			connection.stopRunning();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		clientsList.remove(id);
+	}
+	
 	public static void terminateApp() {
+		for(int i = 0; i< clientsList.size(); i++) {
+			sendMessage(i+1,"logout");
+		}
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
+	public static void removeCloseConnection() {
+		for(int i = 0; i<clientsList.size(); i++) {
+			System.out.println(clientsList.get(i).s.isClosed());
+			if(clientsList.get(i).s.isClosed()) {
+				clientsList.remove(i);
+			}
+		}
+	}
 
 } 
-
 
