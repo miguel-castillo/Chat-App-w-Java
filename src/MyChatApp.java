@@ -1,11 +1,15 @@
 // Socket Chat App By Misael and Miguel CS4770
+package chat;
 
 import java.io.*; 
 import java.util.*; 
 import java.net.*; 
 
  
-public class MyChatApp { 
+public class MyChatApp {
+	
+	final static int MIN_PORT_NUMBER = 49152;
+	final static int MAX_PORT_NUMBER = 65535;
 
 	// List that will store the clients or connections
 	private static ArrayList<ClientHandler> clientsList = new ArrayList<ClientHandler>();
@@ -22,6 +26,14 @@ public class MyChatApp {
 			String userInput = scanner.nextLine(); 
 			try {
 				port_number = Integer.parseInt(userInput);
+				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
+				if(portInUse) {
+					throw new IllegalArgumentException("Invalid start port: " + port_number);
+				}else {
+					if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER) {
+						throw new IllegalArgumentException("Invalid start port: " + port_number);
+				    }
+				}
 			}catch(Exception e){
 				invalidPort();
 			}
@@ -29,6 +41,10 @@ public class MyChatApp {
 		}else {
 			try {
 				port_number = Integer.parseInt(args[0]);
+				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
+				if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER || portInUse) {
+			        throw new IllegalArgumentException("Invalid start port: " + port_number);
+			    }
 			}catch(Exception e){
 				invalidPort();
 			}
@@ -66,7 +82,22 @@ public class MyChatApp {
 
 		});
 		
-	} 
+	}
+	
+	private static boolean availablePort(String host, int port) {
+		  // Assume port is available.
+		  boolean result = true;
+		  
+		  try {
+			(new Socket(host, port)).close();
+		} catch (UnknownHostException e1) {
+			invalidPort();
+		} catch (IOException e1) {
+			invalidPort();
+		}
+
+		  return result;
+		}
 	
 	//server class
 	static class myServer implements Runnable {
