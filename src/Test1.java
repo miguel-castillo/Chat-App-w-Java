@@ -1,11 +1,15 @@
 // Socket Chat App By Misael and Miguel CS4770
+//package chat;
 
 import java.io.*; 
 import java.util.*; 
 import java.net.*; 
 
  
-public class Test1 { 
+public class Test1 {
+	
+	final static int MIN_PORT_NUMBER = 49152;
+	final static int MAX_PORT_NUMBER = 65535;
 
 	// List that will store the clients or connections
 	private static ArrayList<ClientHandler> clientsList = new ArrayList<ClientHandler>();
@@ -22,6 +26,14 @@ public class Test1 {
 			String userInput = scanner.nextLine(); 
 			try {
 				port_number = Integer.parseInt(userInput);
+				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
+				if(!portInUse) {
+					throw new IllegalArgumentException("Invalid start port: " + port_number);
+				}else {
+					if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER) {
+						throw new IllegalArgumentException("Invalid start port: " + port_number);
+				    }
+				}
 			}catch(Exception e){
 				invalidPort();
 			}
@@ -29,6 +41,10 @@ public class Test1 {
 		}else {
 			try {
 				port_number = Integer.parseInt(args[0]);
+				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
+				if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER || portInUse) {
+			        throw new IllegalArgumentException("Invalid start port: " + port_number);
+			    }
 			}catch(Exception e){
 				invalidPort();
 			}
@@ -59,14 +75,37 @@ public class Test1 {
 
 		    @Override
 		    public void run() {
-		    	for(int i = 0; i< clientsList.size(); i++) {
-					sendMessage(i+1,"logout");
-				}
+		    	if(clientsList.size() != 0) {
+		    		for(int i = 0; i< clientsList.size(); i++) {
+						sendMessage(i+1,"logout");
+					}
+		    	}
+		    	
 		    }
 
 		});
 		
-	} 
+	}
+	
+	private static boolean availablePort(String host, int port) {
+		  // Assume port is available.
+		  boolean result = false;
+		  
+		  try {
+			  try {
+	            Socket s = new Socket(host, port);
+	            s.close();
+			  }catch(ConnectException e){
+				  result = true;
+			  }
+
+	        }
+	        catch(Exception e) {
+	            result = false;
+	        }
+
+		  return result;
+		}
 	
 	//server class
 	static class myServer implements Runnable {
@@ -287,13 +326,17 @@ public class Test1 {
 			e.printStackTrace();
 		}
 		clientsList.remove(id);
+		id--;
 	}
 	
 	//close the app safely
 	public static void terminateApp() {
-		for(int i = 0; i< clientsList.size(); i++) {
-			sendMessage(i+1,"logout");
+		if (clientsList.size() != 0){
+			for(int i = 0; i< clientsList.size(); i++) {
+				sendMessage(i+1,"logout");
+			}
 		}
+		
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
@@ -303,11 +346,9 @@ public class Test1 {
 		for(int i = 0; i<clientsList.size(); i++) {
 			if(clientsList.get(i).s.isClosed()) {
 				clientsList.remove(i);
+				id--;
 			}
 		}
 	}
 
 } 
-
-
-

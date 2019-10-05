@@ -1,5 +1,5 @@
 // Socket Chat App By Misael and Miguel CS4770
-package chat;
+//package chat;
 
 import java.io.*; 
 import java.util.*; 
@@ -75,9 +75,12 @@ public class MyChatApp {
 
 		    @Override
 		    public void run() {
-		    	for(int i = 0; i< clientsList.size(); i++) {
-					sendMessage(i+1,"logout");
-				}
+		    	if(clientsList.size() != 0) {
+		    		for(int i = 0; i< clientsList.size(); i++) {
+						sendMessage(i+1,"logout");
+					}
+		    	}
+		    	
 		    }
 
 		});
@@ -323,13 +326,17 @@ public class MyChatApp {
 			e.printStackTrace();
 		}
 		clientsList.remove(id);
+		id--;
 	}
 	
 	//close the app safely
 	public static void terminateApp() {
-		for(int i = 0; i< clientsList.size(); i++) {
-			sendMessage(i+1,"logout");
+		if (clientsList.size() != 0){
+			for(int i = 0; i< clientsList.size(); i++) {
+				sendMessage(i+1,"logout");
+			}
 		}
+		
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
@@ -339,6 +346,7 @@ public class MyChatApp {
 		for(int i = 0; i<clientsList.size(); i++) {
 			if(clientsList.get(i).s.isClosed()) {
 				clientsList.remove(i);
+				id--;
 			}
 		}
 	}
