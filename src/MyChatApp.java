@@ -27,7 +27,7 @@ public class MyChatApp {
 			try {
 				port_number = Integer.parseInt(userInput);
 				boolean portInUse = availablePort(InetAddress.getLocalHost().getHostAddress(), port_number);
-				if(portInUse) {
+				if(!portInUse) {
 					throw new IllegalArgumentException("Invalid start port: " + port_number);
 				}else {
 					if (port_number < MIN_PORT_NUMBER || port_number > MAX_PORT_NUMBER) {
@@ -86,15 +86,18 @@ public class MyChatApp {
 	
 	private static boolean availablePort(String host, int port) {
 		  // Assume port is available.
-		  boolean result = true;
+		  boolean result = false;
 		  
 		  try {
-			(new Socket(host, port)).close();
-		} catch (UnknownHostException e1) {
-			invalidPort();
-		} catch (IOException e1) {
-			invalidPort();
-		}
+
+	            Socket s = new Socket(host, port);
+	            s.close();
+	            result = true;
+
+	        }
+	        catch(Exception e) {
+	            result = false;
+	        }
 
 		  return result;
 		}
