@@ -86,7 +86,7 @@ public class MyChatApp {
 					System.out.println("Adding client to your list with index: "+ id); 
 					
 					// Create a new handler object for handling this request. 
-					ClientHandler newConnection = new ClientHandler(s, dis, dos); 
+					ClientHandler newConnection = new ClientHandler(s, dis, dos, id); 
 					
 					// Create a new Thread with this object. 
 					Thread newClientThread = new Thread(newConnection); 
@@ -161,7 +161,7 @@ public class MyChatApp {
 						System.out.println("Adding client to your list with index: "+ id); 
 						
 						// Create a new handler object for handling this request. 
-						ClientHandler newConnection = new ClientHandler(s, dis, dos); 
+						ClientHandler newConnection = new ClientHandler(s, dis, dos, id); 
 						
 						// Create a new Thread with this object. 
 						Thread newClientThread = new Thread(newConnection); 
@@ -198,15 +198,7 @@ public class MyChatApp {
 						System.out.println("Please enter a valid connection ID.");
 					} else {
 						ClientHandler connection = clientsList.get(connectionID);
-						try {
-							
-							connection.s.close();
-							connection.dis.close();
-							connection.dos.close();
-							connection.stopRunning();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						terminateConnection(connection, connectionID);
 					}
 					
 				}else if(command[0].toLowerCase().equals("send")) {
@@ -270,7 +262,24 @@ public class MyChatApp {
 		System.out.println("Try running the program again with a valid port number.");
 		terminateApp();
 	}
+	public static void terminateConnection(ClientHandler client, int id) {
+		ClientHandler connection = client;
+		try {
+			
+			connection.s.close();
+			connection.dis.close();
+			connection.dos.close();
+			connection.stopRunning();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		clientsList.remove(id);
+	}
+	
 	public static void terminateApp() {
+		for(int i = 0; i< clientsList.size(); i++) {
+			sendMessage(i+1,"logout");
+		}
 		System.out.println("Program Terminated. Bye...");
 		System.exit(0);
 	}
@@ -288,13 +297,15 @@ class ClientHandler implements Runnable
 	public Socket s; 
 	boolean isloggedin;
 	private volatile boolean flag = true;
+	private int id;
 	
 	// constructor 
-	public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos) { 
+	public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos, int id) { 
 		this.dis = dis; 
 		this.dos = dos; 
 		this.s = s; 
 		this.isloggedin=true; 
+		this.id = id;
 	} 
 	
 	public void stopRunning() {
@@ -315,18 +326,20 @@ class ClientHandler implements Runnable
 				//Will display the message receive
 				received = dis.readUTF(); 
 				
-				System.out.println("=============== New Message Receive ==================");
-				System.out.println("Message receive from " + s.getInetAddress());
-				System.out.println("Sender's Port: " + s.getPort());
-				System.out.println("Message: "+received);
-				System.out.println("======================================================");
-				
 				//Should delete the connection from the vector
 				if(received.equals("logout")){ 
 					this.isloggedin=false; 
-					this.s.close(); 
+					System.out.println("==* Connection with ID "+ id +"disconnected and removed from your list *==");
+					this.s.close();
 					break; 
-				} 
+				} else {
+					System.out.println("=============== New Message Receive ==================");
+					System.out.println("Message receive from " + s.getInetAddress());
+					System.out.println("Sender's Port: " + s.getPort());
+					System.out.println("Message: "+received);
+					System.out.println("======================================================");
+					
+				}
 
 			} catch (IOException e) { 
 				
